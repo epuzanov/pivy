@@ -110,7 +110,7 @@
   \subpage examiner
 """
 
-from PySide2 import QtCore, QtGui, QtOpenGL
+from PySide2 import QtCore, QtGui, QtWidgets
 
 from pivy import coin
 
@@ -133,8 +133,7 @@ def renderCB(closure, manager):
     thisp = closure
     thisp.makeCurrent()
     thisp.actualRedraw()
-    if (thisp.doubleBuffer()):
-        thisp.swapBuffers()
+    thisp.update(thisp.visibleRegion())
     thisp.doneCurrent()
 
 # FIXME jkg: figure out what foo is
@@ -165,7 +164,7 @@ def postrenderCB(userdata, manager):
         statemachine.postGLRender()
 
 
-class QuarterWidget(QtOpenGL.QGLWidget):
+class QuarterWidget(QtWidgets.QOpenGLWidget):
 
     _sensormanager = None
     _imagereader = None
@@ -173,30 +172,33 @@ class QuarterWidget(QtOpenGL.QGLWidget):
     def __init__(self, *args, **kwargs):
         """
         Constructs a QuarterWidget.
-        QuarterWidget(QWidget parent = None, QGLWidget sharewidget = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
-        QuarterWidget(QGLContext context, QWidget parent = None, QGLWidget sharewidget = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
-        QuarterWidget(QGLFormat format, QWidget parent = None, QGLWidget sharewidget = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
+        QuarterWidget(QWidget parent = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
+        QuarterWidget(QOpenGLContext context, QWidget parent = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
+        QuarterWidget(QSurfaceFormat format, QWidget parent = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
         """
 
-        params = ["parent", "sharewidget"]
-        values = {"parent": None, "sharewidget": None, "f": 0, "scxml": "coin:scxml/navigation/examiner.xml"}
+        params = 2
+        values = {"parent": None, "f": 0, "context": None, "format": None, "scxml": "coin:scxml/navigation/examiner.xml"}
         values.update(kwargs)
-        
-        if len(args) > 0 and isinstance(args[0], QtOpenGL.QGLContext) or "context" in kwargs:
-            params.insert(0, "context")
-        elif len(args) > 0 and isinstance(args[0], QtOpenGL.QGLFormat) or "format" in kwargs:
-            params.insert(0, "format")
 
-        if len(args) > len(params):
-            values["f"] = args[len(params)]
+        if len(args) > 0 and isinstance(args[0], QtGui.QOpenGLContext):
+            values["context"] = args[0]
+        elif len(args) > 0 and isinstance(args[0], QtGui.QSurfaceFormat):
+            values["format"] = args[0]
+        else:
+            params -= 1
 
-        if len(args) > len(params) + 1:
-            values["scxml"] = args[len(params) + 1]
+        if len(args) > params:
+            values["f"] = args[params]
+            params += 1
 
-        for i in range(len(args), len(params)):
-            args += (values[params[i]],)
+        if len(args) > params:
+            values["scxml"] = args[params]
 
-        QtOpenGL.QGLWidget.__init__(self, *args[:len(params)])
+        QtWidgets.QOpenGLWidget.__init__(self)
+        self.setTextureFormat(3)
+        if isinstance(values["parent"], QtWidgets.QWidget): self.setParent(values["parent"])
+        if isinstance(values["format"], QtGui.QSurfaceFormat): self.setFormat(values["format"])
         if values["f"]: self.setWindowFlags(values["f"])
 
         # initialize Sensormanager and ImageReader instances only once
@@ -207,7 +209,7 @@ class QuarterWidget(QtOpenGL.QGLWidget):
             QuarterWidget._imagereader = ImageReader()
 
         self.cachecontext_list = []
-        self.cachecontext = self.findCacheContext(self, values["sharewidget"])
+        self.cachecontext = self.findCacheContext(self, None)
         self.statecursormap = {}
 
         self.scene = None
@@ -341,7 +343,7 @@ class QuarterWidget(QtOpenGL.QGLWidget):
             return True
 
         # NOTE jkg: we must return True or False
-        return QtOpenGL.QGLWidget.event(self, qevent)
+        return QtWidgets.QOpenGLWidget.event(self, qevent)
 
     def setStateCursor(self, state, cursor):
         self.statecursormap[state] = cursor
