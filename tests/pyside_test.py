@@ -1,6 +1,9 @@
 from __future__ import print_function
 import unittest
-from PySide2 import QtCore
+try:
+    from PySide6 import QtCore
+except ImportError:
+    from PySide2 import QtCore
 import shiboken2 as wrapper
 
 

@@ -109,12 +109,16 @@ if '__main__' in sys.modules:
 # if no GUI has been specified try using Quarter
 if not gui:
     try:
-        __import__('PySide2')
+        try:
+            __import__('PySide6')
+            from PySide6 import QtGui, QtCore, QtWidgets
+        except ImportError:
+            __import__('PySide2')
+            from PySide2 import QtGui, QtCore, QtWidgets
         quarter = __import__('pivy.quarter').quarter
         gui = 'Quarter'
 
         import pivy
-        from PySide2 import QtGui, QtCore, QtWidgets
 
         class SoGui(object):
             @staticmethod

@@ -24,8 +24,12 @@
 """
 from __future__ import print_function
 
-from PySide2.QtCore import QEvent
-from PySide2.QtGui import QMouseEvent
+try:
+    from PySide6.QtCore import QEvent
+    from PySide6.QtGui import QMouseEvent
+except ImportError:
+    from PySide2.QtCore import QEvent
+    from PySide2.QtGui import QMouseEvent
 from pivy.coin import SoLocation2Event
 from pivy.coin import SbVec2s
 

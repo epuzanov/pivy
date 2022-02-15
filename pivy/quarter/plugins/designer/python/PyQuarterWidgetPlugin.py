@@ -22,13 +22,18 @@ $install_prefix/site-packages/pivy/quarter/plugins to the
 QT_PLUGIN_PATH environment variable.
 """
 
-from PySide2 import QtGui, QtCore, QtDesigner
+try:
+    from PySide6 import QtGui, QtCore, QtDesigner
+    from PySide6.QtDesigner import QDesignerCustomWidgetInterface
+except ImportError:
+    from PySide2 import QtGui, QtCore
+    from PySide2.QtDesigner import QPyDesignerCustomWidgetPlugin as QDesignerCustomWidgetInterface
 from pivy import coin, quarter
 
-class PyQuarterWidgetPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
+class PyQuarterWidgetPlugin(QDesignerCustomWidgetInterface):
 
     def __init__(self, parent=None):
-        QtDesigner.QPyDesignerCustomWidgetPlugin.__init__(self)
+        QDesignerCustomWidgetInterface.__init__(self)
 
         self._initialized = False
         self._firstwidget = None

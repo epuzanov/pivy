@@ -14,10 +14,16 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from PySide2 import QtCore
-from PySide2.QtCore import QObject
-from PySide2.QtGui import QMouseEvent
-from PySide2.QtWidgets import QMenu, QActionGroup, QAction
+try:
+    from PySide6 import QtCore
+    from PySide6.QtCore import QObject
+    from PySide6.QtGui import QMouseEvent, QActionGroup, QAction
+    from PySide6.QtWidgets import QMenu
+except ImportError:
+    from PySide2 import QtCore
+    from PySide2.QtCore import QObject
+    from PySide2.QtGui import QMouseEvent
+    from PySide2.QtWidgets import QMenu, QActionGroup, QAction
 
 from pivy import coin
 from pivy.coin import SoEventManager, SoScXMLStateMachine, SoRenderManager, SoGLRenderAction

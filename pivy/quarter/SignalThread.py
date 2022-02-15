@@ -14,10 +14,10 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-from PySide2.QtCore import QThread
-from PySide2.QtCore import QWaitCondition
-from PySide2.QtCore import QMutex
-from PySide2.QtCore import SIGNAL
+try:
+    from PySide6.QtCore import QThread, QWaitCondition, QMutex, Signal
+except ImportError:
+    from PySide2.QtCore import QThread, QWaitCondition, QMutex, SIGNAL as Signal
 
 
 class SignalThread(QThread):
@@ -46,5 +46,5 @@ class SignalThread(QThread):
             # just wait, and trigger every time we receive a signal
             self.waitcond.wait(self.mutex)
             if not self.isstopped:
-                self.emit(SIGNAL("triggerSignal()"))
+                self.emit(Signal("triggerSignal()"))
         self.mutex.unlock()

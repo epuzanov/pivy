@@ -6,7 +6,10 @@ def add_marker_from_svg(file_path, marker_name, pixel_x=10, pixel_y=None,
     """adds a new marker bitmap from a vector graphic (svg)"""
 
     # get an icon from the svg rendered with the given pixel
-    from PySide2 import QtCore, QtGui
+    try:
+        from PySide6 import QtCore, QtGui
+    except ImportError:
+        from PySide2 import QtCore, QtGui
     pixel_y = pixel_y or pixel_x
     icon = QtGui.QIcon(file_path)
     icon = QtGui.QBitmap(icon.pixmap(pixel_x, pixel_y))

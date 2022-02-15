@@ -1,7 +1,10 @@
 from __future__ import print_function
 from pivy import quarter, coin
-from PySide2 import QtGui, QtCore
 import tempfile
+try:
+    from PySide6 import QtGui, QtCore
+except ImportError:
+    from PySide2 import QtGui, QtCore
 
 class Viewer(quarter.QuarterWidget):
     def __init__(self, *args, **kwrds):

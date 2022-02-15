@@ -110,7 +110,12 @@
   \subpage examiner
 """
 
-from PySide2 import QtCore, QtGui, QtWidgets
+try:
+    from PySide6 import QtCore, QtGui, QtWidgets
+    from PySide6 import QtOpenGLWidgets
+except ImportError:
+    from PySide2 import QtCore, QtGui, QtWidgets
+    from PySide2 import QtWidgets as QtOpenGLWidgets
 
 from pivy import coin
 
@@ -164,7 +169,7 @@ def postrenderCB(userdata, manager):
         statemachine.postGLRender()
 
 
-class QuarterWidget(QtWidgets.QOpenGLWidget):
+class QuarterWidget(QtOpenGLWidgets.QOpenGLWidget):
 
     _sensormanager = None
     _imagereader = None
@@ -172,13 +177,13 @@ class QuarterWidget(QtWidgets.QOpenGLWidget):
     def __init__(self, *args, **kwargs):
         """
         Constructs a QuarterWidget.
-        QuarterWidget(QWidget parent = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
-        QuarterWidget(QOpenGLContext context, QWidget parent = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
-        QuarterWidget(QSurfaceFormat format, QWidget parent = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
+        QuarterWidget(QWidget parent = None, QOpenGLWidget sharewidget = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
+        QuarterWidget(QOpenGLContext context, QWidget parent = None, QOpenGLWidget sharewidget = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
+        QuarterWidget(QSurfaceFormat format, QWidget parent = None, QOpenGLWidget sharewidget = None, Qt.WindowFlags f = 0, scxml = "coin:scxml/navigation/examiner.xml")
         """
 
         params = 2
-        values = {"parent": None, "f": 0, "context": None, "format": None, "scxml": "coin:scxml/navigation/examiner.xml"}
+        values = {"parent": None, "sharewidget": None, "f": 0, "context": None, "format": None, "scxml": "coin:scxml/navigation/examiner.xml"}
         values.update(kwargs)
 
         if len(args) > 0 and isinstance(args[0], QtGui.QOpenGLContext):
@@ -189,13 +194,17 @@ class QuarterWidget(QtWidgets.QOpenGLWidget):
             params -= 1
 
         if len(args) > params:
+            values["sharewidget"] = args[params]
+            params += 1
+
+        if len(args) > params:
             values["f"] = args[params]
             params += 1
 
         if len(args) > params:
             values["scxml"] = args[params]
 
-        QtWidgets.QOpenGLWidget.__init__(self)
+        QtOpenGLWidgets.QOpenGLWidget.__init__(self)
         self.setTextureFormat(3)
         if isinstance(values["parent"], QtWidgets.QWidget): self.setParent(values["parent"])
         if isinstance(values["format"], QtGui.QSurfaceFormat): self.setFormat(values["format"])
@@ -209,7 +218,7 @@ class QuarterWidget(QtWidgets.QOpenGLWidget):
             QuarterWidget._imagereader = ImageReader()
 
         self.cachecontext_list = []
-        self.cachecontext = self.findCacheContext(self, None)
+        self.cachecontext = self.findCacheContext(self, values["sharewidget"])
         self.statecursormap = {}
 
         self.scene = None
@@ -343,7 +352,7 @@ class QuarterWidget(QtWidgets.QOpenGLWidget):
             return True
 
         # NOTE jkg: we must return True or False
-        return QtWidgets.QOpenGLWidget.event(self, qevent)
+        return QtOpenGLWidgets.QOpenGLWidget.event(self, qevent)
 
     def setStateCursor(self, state, cursor):
         self.statecursormap[state] = cursor
