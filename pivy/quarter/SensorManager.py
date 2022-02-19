@@ -15,9 +15,9 @@
 #
 
 try:
-    from PySide6.QtCore import QTimer, QObject, QThread, Signal
+    from PySide6.QtCore import QTimer, QObject, QThread, SIGNAL
 except ImportError:
-    from PySide2.QtCore import QTimer, QObject, QThread, SIGNAL as Signal
+    from PySide2.QtCore import QTimer, QObject, QThread, SIGNAL
 
 from pivy.coin import SoDB
 from pivy.coin import SbTime
@@ -33,7 +33,7 @@ class SensorManager(QObject):
         self._mainthread = QThread.currentThread()
 
         self._signalthread = SignalThread()
-        QObject.connect(self._signalthread, Signal("triggerSignal()"),
+        QObject.connect(self._signalthread, SIGNAL("triggerSignal()"),
                         self.sensorQueueChanged)
 
         self._idletimer = QTimer()
@@ -44,9 +44,9 @@ class SensorManager(QObject):
         self._delaytimer.setSingleShot(True)
         self._timerqueuetimer.setSingleShot(True)
 
-        self.connect(self._idletimer, Signal("timeout()"), self.idleTimeout)
-        self.connect(self._delaytimer, Signal("timeout()"), self.delayTimeout)
-        self.connect(self._timerqueuetimer, Signal("timeout()"), self.timerQueueTimeout)
+        self.connect(self._idletimer, SIGNAL("timeout()"), self.idleTimeout)
+        self.connect(self._delaytimer, SIGNAL("timeout()"), self.delayTimeout)
+        self.connect(self._timerqueuetimer, SIGNAL("timeout()"), self.timerQueueTimeout)
 
         SoDB.getSensorManager().setChangedCallback(self.sensorQueueChangedCB, self)
         SoDB.setRealTimeInterval(1.0 / 25.0)
